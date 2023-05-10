@@ -530,7 +530,7 @@ class Configuration:
                  throughtput_edges: Optional[List] = None, 
                  label_record: Optional[Any] = None, 
                  sim_time: Optional[Union[int, float]] = None, 
-                 collectFidelityHistory: Optional[bool] = False, 
+                 collectFidelityHistory: Optional[bool] = True, 
                  experiment: Optional[bool] = False, 
                  result_path: Optional[str] = 'result'):
         

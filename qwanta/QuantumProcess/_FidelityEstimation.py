@@ -190,6 +190,7 @@ class Mixin:
 
 
         if self.configuration.collectFidelityHistory:
+        # if True:
             # Collect fidelity history
             norm_XX = self.Expectation_value['XX']['commute'] + self.Expectation_value['XX']['anti-commute']
             norm_YY = self.Expectation_value['YY']['commute'] + self.Expectation_value['YY']['anti-commute']
