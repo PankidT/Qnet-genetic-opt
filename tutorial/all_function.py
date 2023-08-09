@@ -8,6 +8,8 @@ from qwanta.Qubit import PhysicalQubit
 from tqdm import tqdm
 import random
 import csv
+import pickle
+import matplotlib.pyplot as plt
 
 def multinomial_argmax(probabilities):
     # normalize probabilities to sum to 1
@@ -267,7 +269,7 @@ def crossover(parents, cross, population_size):
         parent2 = random.choice(pool)
 
         #select random point to crossover
-        crossover_point = random.randint(0, len(parent1)-1)
+        crossover_point = random.randint(0, len(parent1)-1)        
             
         #create child
         child = parent1[:crossover_point] + parent2[crossover_point:]
@@ -329,3 +331,101 @@ def decorate_prompt(prompt):
     """
     width = len(prompt) + 4
     return f"{'*' * width}\n  {prompt}\n{'*' * width}\n"
+
+def read_pickle(fileName, plotFC=False, plotF=False, plotC=False):
+    with open(fileName, "rb") as f:
+        my_loaded_object = pickle.load(f)
+    
+    x = np.arange(0, my_loaded_object['Hyperparameters']['num_generation'], 1)
+    w1 = my_loaded_object['Hyperparameters']['w1']
+    w2 = my_loaded_object['Hyperparameters']['w2']
+    mutation_rate = my_loaded_object['Hyperparameters']['mutation_rate']
+    crossover_rate = my_loaded_object['Hyperparameters']['crossover_rate']
+    num_population = my_loaded_object['Hyperparameters']['num_population']
+    num_parents = my_loaded_object['Hyperparameters']['num_parents']
+    num_generation = my_loaded_object['Hyperparameters']['num_generation']
+    # fidelity = my_loaded_object['fidelity_history']
+    # cost = my_loaded_object['cost_history']
+
+    mean_fidelity = [np.mean(fidelity) for fidelity in my_loaded_object['fidelity_history']]
+    mean_cost = [np.mean(cost) for cost in my_loaded_object['cost_history']]
+
+    round_fidelity = []
+    for fidelity in my_loaded_object['fidelity_history'][0]:
+        new_fidelity = round(fidelity, 3)
+        round_fidelity.append(new_fidelity)
+        
+    mode_fidelity = [max(set(round_fidelity), key=round_fidelity.count) for round_fidelity in my_loaded_object['fidelity_history']]
+
+    fig, ax = plt.subplots(2, 2, figsize=(15, 10))
+
+    if plotFC == True:                
+        ax[0, 0].set_title(f'w1: {w1}, w2: {w2}, mr: {mutation_rate}, cr: {crossover_rate}, pop: {num_population}, parents: {num_parents}, ng: {num_generation}', loc='right')
+
+        color = 'tab:red'
+        ax[0, 0].set_xlabel('generation')
+        ax[0, 0].set_ylabel('fidelity', color=color)
+        ax[0, 0].plot(x, mean_fidelity, color=color)
+        ax[0, 0].tick_params(axis='y', labelcolor=color)
+
+        ax2 = ax[0, 0].twinx()  # instantiate a second axes that shares the same x-axis
+
+        color = 'tab:blue'
+        ax2.set_ylabel('cost', color=color)  # we already handled the x-label with ax1
+        ax2.plot(x, mean_cost, color=color)
+        ax2.tick_params(axis='y', labelcolor=color)
+
+        fig.tight_layout()  # otherwise the right y-label is slightly clipped
+
+        ax[0, 1].plot(my_loaded_object['fidelity_history'][0], my_loaded_object['cost_history'][0], '.')
+        ax[0, 1].set_xlabel('fidelity')
+        ax[0, 1].set_ylabel('cost')
+
+    if plotF == True:
+        ax[1, 0].set_title('Fidelity of each generation')
+        ax[1, 0].set_xlabel('generation')
+        ax[1, 0].set_ylabel('fidelity')
+        ax[1, 0].plot(x, np.max(my_loaded_object['fidelity_history'], axis=1), label='max fidelity', color='tab:red')
+        ax[1, 0].plot(x, np.min(my_loaded_object['fidelity_history'], axis=1), label='min fidelity', color='tab:green')
+        ax[1, 0].plot(x, np.mean(my_loaded_object['fidelity_history'], axis=1), label='mean fidelity', color='tab:blue')
+        ax[1, 0].plot(x, mode_fidelity, label='mode fidelity', color='tab:orange')
+        ax[1, 0].fill_between(x, np.max(my_loaded_object['fidelity_history'], axis=1), np.min(my_loaded_object['fidelity_history'], axis=1), alpha=0.2, label='range fidelity')
+        ax[1, 0].legend()
+        
+
+    if plotC == True:
+        # ax[1, 1].set_title('Cost of each generation')
+        # ax[1, 1].set_xlabel('generation')
+        # ax[1, 1].set_ylabel('cost')
+        # # ax[1, 1].plot(x, np.max(my_loaded_object['cost_history'], axis=1), label='max cost', color='tab:red')
+        # ax[1, 1].plot(x, np.min(my_loaded_object['cost_history'], axis=1), label='min cost', color='tab:green')
+        # ax[1, 1].plot(x, np.mean(my_loaded_object['cost_history'], axis=1), label='mean cost', color='tab:blue')
+        # # ax[1, 1].fill_between(x, np.max(my_loaded_object['cost_history'], axis=1), np.min(my_loaded_object['cost_history'], axis=1), alpha=0.2, label='range cost')
+        # ax[1, 1].legend()
+
+        ax[1, 1].set_title('Evolution of cost')
+
+        color = 'tab:red'
+        ax[1, 1].set_xlabel('generation')
+        ax[1, 1].set_ylabel('avg cost', color=color)
+        ax[1, 1].plot(x, np.mean(my_loaded_object['cost_history'], axis=1), 'r.-', label='mean cost', color=color)
+        ax[1, 1].tick_params(axis='y', labelcolor=color)
+
+        ax2 = ax[1, 1].twinx()  # instantiate a second axes that shares the same x-axis
+
+        color = 'tab:blue'
+        ax2.set_ylabel('best cost', color=color)  # we already handled the x-label with ax1
+        ax[1, 1].plot(x, np.min(my_loaded_object['cost_history'], axis=1), 'b+',label='min cost', color=color)
+        ax2.tick_params(axis='y', labelcolor=color)
+
+        fig.tight_layout()  # otherwise the right y-label is slightly clipped
+        ax[1, 1].legend()
+        
+        
+
+    # if plotDot == True:
+        
+    #     plt.plot(my_loaded_object['fidelity_history'][0], my_loaded_object['cost_history'][0], '.')
+    #     plt.xlabel('fidelity')
+    #     plt.ylabel('cost')
+        

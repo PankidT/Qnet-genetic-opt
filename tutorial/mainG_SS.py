@@ -7,11 +7,9 @@ def main_process(
     experiment_name,
     weight1 = 0.5,
     weight2 = 0.5,
-    numPopulation = 50,
-    numSelect = 30,
-    numMutate = 10,
-    mutateRateHigh = 0.1,
-    mutateRateLow = 0.05,
+    # mutationRate = 0.05,
+    # crossoverRate = 0.6,
+    numPopulation = 150,
     # parent_size = 30,
     numGeneration = 50
 ):
@@ -122,10 +120,10 @@ def main_process(
             
         
         # parents = roulette_wheel_selection(population=population, costs=cost_value, parent_size=parent_size)
-        selected, selected_mutate = roulette_wheel_selection_SS(population=population, costs=cost_value, numSelected=numSelect, numMutated=numMutate, mutateRateHigh=mutateRateHigh, mutateRateLow=mutateRateLow)
+        selected, selected_mutate = roulette_wheel_selection_SS(population=population, costs=cost_value, numSelected=100, numMutated=30)
 
         # crossover_sim = crossover(parents=parents, cross=crossoverRate, population_size=numPopulation)
-        offspring = crossover_SS(population_size=numPopulation, selected=selected, selected_mutate=selected_mutate, numSelected=numSelect, numMutated=numMutate)
+        offspring = crossover_SS(population_size=numPopulation, selected=selected, selected_mutate=selected_mutate)
 
         # offspring = mutate(children=crossover_sim, mutationRate=mutationRate)
         # print(f'offspring: {offspring}')
