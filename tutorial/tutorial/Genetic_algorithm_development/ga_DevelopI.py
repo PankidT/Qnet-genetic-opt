@@ -1,6 +1,5 @@
-import pickle
-import datetime
 import numpy as np
+import matplotlib.pyplot as plt
 
 class GA_version_2():
 
@@ -24,6 +23,9 @@ class GA_version_2():
         
         self.population = np.clip(self.population, dna_bounds[0], dna_bounds[1])
 
+        self.cost = np.zeros_like(self.population)
+
+        self.dna_bounds = dna_bounds
         self.elitism = elitism
         self.population_size = population_size
         self.mutation_rate = mutation_rate
@@ -77,20 +79,25 @@ class GA_version_2():
 
         return dna
     
-    def execute(self, cost_array):
-        cost_indices = cost_array.argsort()
+    def evolve(self, cost_array):
 
-        sorted_cost_array = cost_array[cost_indices]
-        sorted_population = self.population[cost_indices]
+        assert len(cost_array) == self.population_size
+
+        self.cost = np.array(cost_array)
+
+        cost_indices = self.cost.argsort()
+        sorted_cost_array = self.cost[cost_indices]
+
+        cost_weight = np.maximum(0, 1 - sorted_cost_array / self.cost.sum())
+        cost_weight /= cost_weight.sum()
+
+        sorted_population = self.population[cost_indices]        
 
         self.best_dna = sorted_population[0]
         self.lowest_cost = sorted_cost_array[0]
-
-        cost_weight = np.maximum(0, 1-sorted_cost_array/cost_array.sum())
-        cost_weight /= cost_weight.sum()
         
         # Calculate the number of individuals to keep for the next generation
-        amount_new = int(self.population_size * self.elitism)
+        amount_new = int(self.population_size * self.elitism)        
 
         new_population = []
         for i in range(amount_new):
@@ -106,8 +113,7 @@ class GA_version_2():
         new_population = np.array(new_population + sorted_population[:amount_old].tolist())
 
         assert new_population.shape == self.population.shape
-
-        # Population of new generation created here
+        
         self.population = np.clip(new_population, self.dna_bounds[0], self.dna_bounds[1])
 
         # Collect the best cost value at each generation
@@ -118,3 +124,11 @@ class GA_version_2():
         self.average_cost_history.append(average_cost)
 
         return self.best_dna, self.lowest_cost
+
+    def plot(self):
+        plt.plot(self.lowest_cost_history, label="Lowest cost")
+        plt.plot(self.average_cost_history, label="Average cost")
+        plt.legend()
+        plt.ylabel("Cost")
+        plt.xlabel("Generation")
+        plt.show()
