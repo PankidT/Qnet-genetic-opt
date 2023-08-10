@@ -1,8 +1,8 @@
-from ga_DevelopI import *
-from all_function import *
+# from ga_DevelopI import *
+# from all_function import *
 import sys
 
-sys.path.insert('')
+sys.path.insert(0, '/Users/poramat/Documents/qwanta/tutorial/Genetic_algorithm_development/')
 
 print('import success')
 
