@@ -1,7 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import pickle
+import os
 
-class GA_version_2():
+class GA_Develop_I():
 
     def __init__(self, 
                  dna_size, 
@@ -132,3 +134,42 @@ class GA_version_2():
         plt.ylabel("Cost")
         plt.xlabel("Generation")
         plt.show()
+
+import datetime
+
+class ExperimentResult():
+    def __init__(self, experiment_name, weight1, weight2, mutation_rate,
+                 population_size, elitism, amount_optimization_steps, ga_object=None):
+        self.experiment_config = {
+            'Experiment_name': experiment_name,
+            'DateCreate': datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            'Hyperparameters': {
+                'w1': weight1,
+                'w2': weight2,
+                'mutation_rate': mutation_rate,
+                'num_population': population_size,
+                'num_parents': int(population_size * elitism),
+                'num_generation': amount_optimization_steps,
+            },
+            'Parameter_history': {
+                'loss': [],
+                'gate_error': [],
+                'measurement_error': [],
+                'memory_time': []
+            },
+            'fidelity_history': [],
+            'cost_history': [],            
+            'ga_object': ga_object
+        }
+
+    def add_ga_object(self, ga_object):
+        self.experiment_config['ga_object'] = ga_object
+
+    def save(self, file_name, save_config=True, folder_name='results'):
+
+        if save_config:
+            if not os.path.exists(folder_name):
+                os.makedirs(folder_name)
+
+        with open(file_name, 'wb') as f:
+            pickle.dump(self, f)

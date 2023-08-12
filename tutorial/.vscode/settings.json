@@ -1,0 +1,5 @@
+{
+  "python.analysis.extraPaths": [
+    "./poramat_work_part/Genetic_algorithm_development"
+  ]
+}

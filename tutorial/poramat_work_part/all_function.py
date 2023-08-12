@@ -1,12 +1,12 @@
 from qwanta import Tuner, QuantumNetwork, Configuration, Xperiment
 import pandas as pd
-import ast
+import csv
 import numpy as np
 import networkx as nx
 from qwanta.Qubit import PhysicalQubit
 from tqdm import tqdm
 import random
-import csv
+import datetime
 
 def multinomial_argmax(probabilities):
     # normalize probabilities to sum to 1
@@ -322,9 +322,31 @@ def parameterTransform(loss, coherenceTime, gateErr, meaErr):
     meaErrSim = 0.1 - meaErr*0.1
     return lossSim, coherenceTimeSim, gateErrSim, meaErrSim
 
-def decorate_prompt(prompt):
-    """
-    A helper function to decorate the prompt with asterisks
-    """
-    width = len(prompt) + 4
-    return f"{'*' * width}\n  {prompt}\n{'*' * width}\n"
+def decorate_prompt(prompt, weight1, weight2, mutationRate, numIndividual, parent_size, numGeneration):
+    decorated_prompt = f"+{'=' * 58}+\n"
+    decorated_prompt += f"| {prompt}\n"
+    decorated_prompt += f"+{'=' * 58}+\n"
+    decorated_prompt += f'Date Create: {datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}\n'
+    decorated_prompt += f'+{"-" * 58}+\n'
+    decorated_prompt += f'| Hyperparameters:\n'
+    decorated_prompt += f'+{"-" * 58}+\n'
+    decorated_prompt += f'| weight1 (Fidelity):        {weight1}\n'
+    decorated_prompt += f'| weight2 (Cost):            {weight2}\n'
+    decorated_prompt += f'| Mutation Rate:             {mutationRate}\n'    
+    decorated_prompt += f'| Number of Individuals:     {numIndividual}\n'
+    decorated_prompt += f'| Parent Size before Crossover: {parent_size}\n'
+    decorated_prompt += f'| Number of Generations:     {numGeneration}\n'    
+    decorated_prompt += f'+{"-" * 58}+\n'
+    return decorated_prompt
+
+def read_config_from_csv(file_path):
+    config = {}
+
+    with open(file_path, 'r') as csv_file:
+        csv_reader = csv.DictReader(csv_file)
+        for row in csv_reader:
+            param_name = row['parameter']
+            param_value = row['value']
+            config[param_name] = param_value
+
+    return config
