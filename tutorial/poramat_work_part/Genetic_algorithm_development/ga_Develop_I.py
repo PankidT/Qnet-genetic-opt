@@ -45,18 +45,28 @@ class GA_Develop_I():
         self.lowest_cost_history = []
         self.average_cost_history = []
 
+    # def __create_random_population(
+    #     self,
+    #     dna_size, 
+    #     dna_sigma, 
+    #     dna_start_position,
+    #     population_size):
+    #     # Create a random population of individuals
+        
+    #     # (dimentsion of array)
+    #     population = np.random.standard_normal((population_size, dna_size)) * dna_sigma
+        
+    #     return population + dna_start_position
+    
     def __create_random_population(
         self,
         dna_size, 
         dna_sigma, 
         dna_start_position,
         population_size):
-        # Create a random population of individuals
-        
-        # (dimentsion of array)
         population = np.random.standard_normal((population_size, dna_size)) * dna_sigma
-        
-        return population + dna_start_position
+        shifted_population = 0.5 + 0.3 * (population / (2 * dna_sigma))
+        return shifted_population + dna_start_position
     
     def __crossover(self, dna1, dna2):
 

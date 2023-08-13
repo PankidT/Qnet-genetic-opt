@@ -1,0 +1,15 @@
+{
+  "experiment_name": "my_experiment",
+  "elitism": 0.2,
+  "population_size": 500,
+  "mutation_rate": 0.8,
+  "mutation_sigma": 0.3,
+  "mutation_decay": 0.999,
+  "mutation_limit": 0.01,
+  "amount_optimisation_steps": 400,
+  "dna_bounds": [0, 1],
+  "dna_start_position": [0, 0, 0, 0],
+  "weight1": 0.5,
+  "weight2": 0.5,
+  "objective_fidelity": 0.7
+}

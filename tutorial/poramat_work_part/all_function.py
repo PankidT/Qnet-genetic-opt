@@ -1,12 +1,11 @@
-from qwanta import Tuner, QuantumNetwork, Configuration, Xperiment
 import pandas as pd
 import csv
 import numpy as np
 import networkx as nx
-from qwanta.Qubit import PhysicalQubit
 from tqdm import tqdm
 import random
 import datetime
+import json
 
 def multinomial_argmax(probabilities):
     # normalize probabilities to sum to 1
@@ -339,14 +338,7 @@ def decorate_prompt(prompt, weight1, weight2, mutationRate, numIndividual, paren
     decorated_prompt += f'+{"-" * 58}+\n'
     return decorated_prompt
 
-def read_config_from_csv(file_path):
-    config = {}
-
-    with open(file_path, 'r') as csv_file:
-        csv_reader = csv.DictReader(csv_file)
-        for row in csv_reader:
-            param_name = row['parameter']
-            param_value = row['value']
-            config[param_name] = param_value
-
+def read_config(filename):
+    with open(filename, 'r') as f:
+        config = json.load(f)
     return config
