@@ -124,6 +124,7 @@ class GA():
         # Create a random population of individuals
         
         population = np.random.standard_normal((population_size, dna_size)) * dna_sigma
+        population = 0.5 + 0.2 * (population / (2 * dna_sigma))
         return population + dna_start_position
     
     

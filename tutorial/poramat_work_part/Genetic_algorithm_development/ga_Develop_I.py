@@ -65,7 +65,7 @@ class GA_Develop_I():
         dna_start_position,
         population_size):
         population = np.random.standard_normal((population_size, dna_size)) * dna_sigma
-        shifted_population = 0.5 + 0.3 * (population / (2 * dna_sigma))
+        shifted_population = 0.5 + 0.25 * (population / (2 * dna_sigma))
         return shifted_population + dna_start_position
     
     def __crossover(self, dna1, dna2):
@@ -175,11 +175,13 @@ class ExperimentResult():
     def add_ga_object(self, ga_object):
         self.experiment_config['ga_object'] = ga_object
 
-    def save(self, file_name, save_config=True, folder_name='results'):
+    def save(self, file_path, folder_name, save_config=True):
+
+        folder_name = f'results_{folder_name}'
 
         if save_config:
             if not os.path.exists(folder_name):
                 os.makedirs(folder_name)
 
-        with open(file_name, 'wb') as f:
+        with open(file_path, 'wb') as f:
             pickle.dump(self, f)

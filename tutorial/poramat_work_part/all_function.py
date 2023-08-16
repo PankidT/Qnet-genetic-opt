@@ -40,6 +40,15 @@ def singleObject_cost(baseParameter, simParameter, w1, w2, objectFidelity, simFi
     # cost function
     output = []
     for i in range(len(baseParameter)):
+        print(f'base {baseParameter[i]}')
+        print(f'sim {simParameter[i]}')
+        while baseParameter[i] == 0 or baseParameter[i] == 1:
+            baseParameter[i] = np.random.rand()
+            print(f'new base {baseParameter[i]}')
+        while simParameter[i] == 0 or simParameter[i] == 1:
+            simParameter[i] = np.random.rand()
+            print(f'new sim {simParameter[i]}')
+
         k = np.log(baseParameter[i])/np.log(simParameter[i])
         output.append(k)
 

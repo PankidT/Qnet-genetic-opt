@@ -79,13 +79,15 @@ def main_process(
         measurement_error[i]
     ] for i in range(ga.population_size)]
 
-    for step in tqdm(range(amount_optimisation_steps), desc='Optimizing...'):
+    for step in tqdm(range(amount_optimisation_steps), desc='Optimizing... '):
         
         fidelity_array = []
         cost_array = []
         index = 0
-        for loss_parameter in tqdm(optimize_data, desc='Simulating...'):
+        for loss_parameter in tqdm(optimize_data, desc="Simulating... "):
 
+            # print(np.array(optimize_data).shape)
+            # print(f'loss {loss_parameter}')
             assert len(loss_parameter) == 4
             
             # In this part, loss must be [0, 1] value
@@ -100,8 +102,8 @@ def main_process(
                 loss, memory_time, gate_error, measurement_error
             )
 
-            print(f'Loss {loss, memory_time, gate_error, measurement_error}')
-            print(f'Transform loss {Tloss, Tmemory_time, Tgate_error, Tmeasurement_error}')
+            # print(f'Loss {loss, memory_time, gate_error, measurement_error}')
+            # print(f'Transform loss {Tloss, Tmemory_time, Tgate_error, Tmeasurement_error}')
 
             # Qwanta Simulation Part
             num_hops = 2
@@ -139,7 +141,8 @@ def main_process(
             )
 
             result = exps.execute()
-            fidelity = result['0G']['fidelity']            
+            fidelity = result['0G']['fidelity']   
+            # print(f'Fidelity {fidelity}')         
 
             # Check parameter carefully in every loop
             cost = singleObject_cost(
@@ -150,30 +153,34 @@ def main_process(
                 objectFidelity=objective_fidelity,
                 simFidelity=fidelity
             )
+            # print(f'Base {baseline_value[index]}, index {index}')
+            # print(f'Loss parameter {loss_parameter}')
+            # print(f'Cost {cost}')
 
             # Fidelity array will correct all fidelity in one Generation
             fidelity_array.append(fidelity)
             cost_array.append(cost)
-            index += 1                        
-
+            index += 1
+            
         assert len(fidelity_array) == len(optimize_data) == len(cost_array) == ga.population_size
 
-        experiment_result['Fidelity_history'].append(fidelity_array)
+        # experiment_result['Fidelity_history'].append(fidelity_array)
 
-        # Genetic Algorithm Part
+        # Genetic Algorithm Part        
+
+        # This will be next baseline value (population before evole)
+        baseline_value = ga.population
+        print(f'Baseline value {baseline_value}')
+
         best_dna, lowest_cost = ga.evolve(np.array(cost_array))
 
-        # New population
-        loss_new = [ga.population[i][0] for i in range(ga.population_size)]
-        memory_time_new = [ga.population[i][1] for i in range(ga.population_size)]
-        gate_error_new = [ga.population[i][2] for i in range(ga.population_size)]
-        measurement_error_new = [ga.population[i][3] for i in range(ga.population_size)]
+        # This will be next sim value (population after evole)
+        optimize_data = [
+            [ga.population[i][0], ga.population[i][1], ga.population[i][2], ga.population[i][3]] for i in range(ga.population_size)
+        ]
+        print(f'Optimize data {optimize_data}')        
 
-        # update simulation parameter
-        optimize_data = [loss_new, memory_time_new, gate_error_new, measurement_error_new]
-        baseline_value = ga.population
-
-        assert np.array(optimize_data).shape == (4, ga.population_size)
+        assert np.array(optimize_data).shape == (ga.population_size, 4)
 
         print(f'Generation {step+1} | Lowest cost: {lowest_cost} | Best DNA: {best_dna}')
 
@@ -181,7 +188,7 @@ def main_process(
     experiment_result.add_ga_object(ga)
 
     path = f'results/{experiment_name}'
-    experiment_result.save(file_name=path)
+    experiment_result.save(file_path=path, folder_name=experiment_name)
 
 if __name__ == '__main__':
     config_filename = "config.json"
