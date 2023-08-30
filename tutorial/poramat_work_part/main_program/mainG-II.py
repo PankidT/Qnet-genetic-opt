@@ -7,6 +7,7 @@ from ga_Develop_I import *
 from all_function import *
 from qwanta import Xperiment
 from tqdm import tqdm
+import os
 
 def main_process(
     experiment_name='Experiment_1',
@@ -21,8 +22,33 @@ def main_process(
     dna_start_position = [0, 0, 0, 0],
     weight1 = 0.5,
     weight2 = 0.5,
-    objective_fidelity = 0.7
+    objective_fidelity = 0.7,
+    num_hops = 2,
+    excel_file = "exper_id3_selectedStats_2hops.xlsx"
 ):    
+    
+    num_nodes = num_hops + 1
+
+    node_info = {f'Node {i}': {'coordinate': (int(i*100), 0, 0)} for i in range(num_nodes)}
+    edge_info = {
+        (f'Node {i}', f'Node {i+1}'): {
+        'connection-type': 'Space',
+        'depolarlizing error': [1 - depo_prob, depo_prob/3, depo_prob/3, depo_prob/3],
+        'loss': Tloss,
+        'light speed': 300000,
+        'Pulse rate': 0.0001,
+        f'Node {i}':{
+            'gate error': Tgate_error,
+            'measurement error': Tmeasurement_error,
+            'memory function': Tmemory_time
+        },
+        f'Node {i+1}':{
+            'gate error': Tgate_error,
+            'measurement error': Tmeasurement_error,
+            'memory function': Tmemory_time
+        },
+        }
+    for i in range(num_hops)}
 
     ga = GA_Develop_I(
         dna_size=len(dna_start_position),
@@ -38,6 +64,8 @@ def main_process(
 
     experiment_result = ExperimentResult(
         experiment_name=experiment_name, 
+        node_info=node_info,
+        edge_info=edge_info,
         weight1=weight1, 
         weight2=weight2, 
         mutation_rate=mutation_rate,
@@ -85,9 +113,7 @@ def main_process(
         cost_array = []
         index = 0
         for loss_parameter in tqdm(optimize_data, desc="Simulating... "):
-
-            # print(np.array(optimize_data).shape)
-            # print(f'loss {loss_parameter}')
+            
             assert len(loss_parameter) == 4
             
             # In this part, loss must be [0, 1] value
@@ -100,38 +126,10 @@ def main_process(
             # Transform parameter
             Tloss, Tmemory_time, Tgate_error, Tmeasurement_error = parameterTransform(
                 loss, memory_time, gate_error, measurement_error
-            )
-
-            # print(f'Loss {loss, memory_time, gate_error, measurement_error}')
-            # print(f'Transform loss {Tloss, Tmemory_time, Tgate_error, Tmeasurement_error}')
-
-            # Qwanta Simulation Part
-            num_hops = 2
-            num_nodes = num_hops + 1
-
-            node_info = {f'Node {i}': {'coordinate': (int(i*100), 0, 0)} for i in range(num_nodes)}
-            edge_info = {
-                (f'Node {i}', f'Node {i+1}'): {
-                'connection-type': 'Space',
-                'depolarlizing error': [1 - depo_prob, depo_prob/3, depo_prob/3, depo_prob/3],
-                'loss': Tloss,
-                'light speed': 300000,
-                'Pulse rate': 0.0001,
-                f'Node {i}':{
-                    'gate error': Tgate_error,
-                    'measurement error': Tmeasurement_error,
-                    'memory function': Tmemory_time
-                },
-                f'Node {i+1}':{
-                    'gate error': Tgate_error,
-                    'measurement error': Tmeasurement_error,
-                    'memory function': Tmemory_time
-                },
-                }
-            for i in range(num_hops)}
+            )            
 
             exps = Xperiment(
-                timelines_path = '../network/exper_id3_selectedStats_2hops.xlsx',
+                timelines_path = f'../network/{excel_file}',
                 nodes_info_exp = node_info,
                 edges_info_exp = edge_info,
                 gate_error = Tgate_error,
@@ -141,8 +139,7 @@ def main_process(
             )
 
             result = exps.execute()
-            fidelity = result['0G']['fidelity']   
-            # print(f'Fidelity {fidelity}')         
+            fidelity = result['0G']['fidelity']                     
 
             # Check parameter carefully in every loop
             cost = singleObject_cost(
@@ -152,10 +149,7 @@ def main_process(
                 w2=weight2,
                 objectFidelity=objective_fidelity,
                 simFidelity=fidelity
-            )
-            # print(f'Base {baseline_value[index]}, index {index}')
-            # print(f'Loss parameter {loss_parameter}')
-            # print(f'Cost {cost}')
+            )            
 
             # Fidelity array will correct all fidelity in one Generation
             fidelity_array.append(fidelity)
@@ -188,10 +182,15 @@ def main_process(
     experiment_result.add_ga_object(ga)
 
     path = f'results/{experiment_name}'
+    if not os.path.exists('results'):
+        os.mkdir('results')
     experiment_result.save(file_path=path, folder_name=experiment_name)
 
 if __name__ == '__main__':
-    config_filename = "config.json"
+
+    input_config = input("Enter config file name : ")
+
+    config_filename = input_config
     config = read_config(config_filename)
 
     experiment_name = config["experiment_name"]
@@ -207,6 +206,8 @@ if __name__ == '__main__':
     weight1 = config["weight1"]
     weight2 = config["weight2"]
     objective_fidelity = config["objective_fidelity"]
+    num_hops = config["num_hops"]
+    excel_file = config["excel_file"]
 
     main_process(
         experiment_name,
@@ -221,5 +222,7 @@ if __name__ == '__main__':
         dna_start_position,
         weight1,
         weight2,
-        objective_fidelity
+        objective_fidelity,
+        num_hops,
+        excel_file
     )

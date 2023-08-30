@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pickle
 import os
+import datetime
 
 class GA_Develop_I():
 
@@ -145,13 +146,13 @@ class GA_Develop_I():
         plt.xlabel("Generation")
         plt.show()
 
-import datetime
-
 class ExperimentResult():
-    def __init__(self, experiment_name, weight1, weight2, mutation_rate,
+    def __init__(self, experiment_name, node_info, edge_info, weight1, weight2, mutation_rate,
                  population_size, elitism, amount_optimization_steps, ga_object=None):
         self.experiment_config = {
             'Experiment_name': experiment_name,
+            'Node_info': node_info,
+            'Edge_info': edge_info,
             'DateCreate': datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             'Hyperparameters': {
                 'w1': weight1,
@@ -175,13 +176,9 @@ class ExperimentResult():
     def add_ga_object(self, ga_object):
         self.experiment_config['ga_object'] = ga_object
 
-    def save(self, file_path, folder_name, save_config=True):
+    def save(self, file_path, folder_name):
 
-        folder_name = f'results_{folder_name}'
-
-        if save_config:
-            if not os.path.exists(folder_name):
-                os.makedirs(folder_name)
+        folder_name = f'results_{folder_name}'        
 
         with open(file_path, 'wb') as f:
             pickle.dump(self, f)
