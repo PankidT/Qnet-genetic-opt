@@ -40,8 +40,8 @@ def singleObject_cost(baseParameter, simParameter, w1, w2, objectFidelity, simFi
     # cost function
     output = []
     for i in range(len(baseParameter)):
-        print(f'base {baseParameter[i]}')
-        print(f'sim {simParameter[i]}')
+        # print(f'base {baseParameter[i]}')
+        # print(f'sim {simParameter[i]}')
         while baseParameter[i] == 0 or baseParameter[i] == 1:
             baseParameter[i] = np.random.rand()
             print(f'new base {baseParameter[i]}')
@@ -330,7 +330,7 @@ def parameterTransform(loss, coherenceTime, gateErr, meaErr):
     meaErrSim = 0.1 - meaErr*0.1
     return lossSim, coherenceTimeSim, gateErrSim, meaErrSim
 
-def decorate_prompt(prompt, weight1, weight2, mutationRate, numIndividual, parent_size, numGeneration):
+def decorate_prompt(prompt, experiment_name,weight1, weight2, mutationRate, numIndividual, parent_size, numGeneration, strategy, num_hops):
     decorated_prompt = f"+{'=' * 58}+\n"
     decorated_prompt += f"| {prompt}\n"
     decorated_prompt += f"+{'=' * 58}+\n"
@@ -338,12 +338,15 @@ def decorate_prompt(prompt, weight1, weight2, mutationRate, numIndividual, paren
     decorated_prompt += f'+{"-" * 58}+\n'
     decorated_prompt += f'| Hyperparameters:\n'
     decorated_prompt += f'+{"-" * 58}+\n'
+    decorated_prompt += f'| Experiment Name:           {experiment_name}\n'
     decorated_prompt += f'| weight1 (Fidelity):        {weight1}\n'
     decorated_prompt += f'| weight2 (Cost):            {weight2}\n'
     decorated_prompt += f'| Mutation Rate:             {mutationRate}\n'    
     decorated_prompt += f'| Number of Individuals:     {numIndividual}\n'
     decorated_prompt += f'| Parent Size before Crossover: {parent_size}\n'
     decorated_prompt += f'| Number of Generations:     {numGeneration}\n'    
+    decorated_prompt += f'| Strategy:                  {strategy}\n'
+    decorated_prompt += f'| Number of Hops:            {num_hops}\n'
     decorated_prompt += f'+{"-" * 58}+\n'
     return decorated_prompt
 

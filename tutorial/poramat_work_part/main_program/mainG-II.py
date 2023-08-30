@@ -24,31 +24,9 @@ def main_process(
     weight2 = 0.5,
     objective_fidelity = 0.7,
     num_hops = 2,
-    excel_file = "exper_id3_selectedStats_2hops.xlsx"
-):    
-    
-    num_nodes = num_hops + 1
-
-    node_info = {f'Node {i}': {'coordinate': (int(i*100), 0, 0)} for i in range(num_nodes)}
-    edge_info = {
-        (f'Node {i}', f'Node {i+1}'): {
-        'connection-type': 'Space',
-        'depolarlizing error': [1 - depo_prob, depo_prob/3, depo_prob/3, depo_prob/3],
-        'loss': Tloss,
-        'light speed': 300000,
-        'Pulse rate': 0.0001,
-        f'Node {i}':{
-            'gate error': Tgate_error,
-            'measurement error': Tmeasurement_error,
-            'memory function': Tmemory_time
-        },
-        f'Node {i+1}':{
-            'gate error': Tgate_error,
-            'measurement error': Tmeasurement_error,
-            'memory function': Tmemory_time
-        },
-        }
-    for i in range(num_hops)}
+    excel_file = "exper_id3_selectedStats_2hops.xlsx",
+    strategy = "0G"
+):            
 
     ga = GA_Develop_I(
         dna_size=len(dna_start_position),
@@ -63,9 +41,8 @@ def main_process(
     )
 
     experiment_result = ExperimentResult(
-        experiment_name=experiment_name, 
-        node_info=node_info,
-        edge_info=edge_info,
+        experiment_name=experiment_name,        
+        strategy=strategy,
         weight1=weight1, 
         weight2=weight2, 
         mutation_rate=mutation_rate,
@@ -76,12 +53,15 @@ def main_process(
 
     decorated_prompt = decorate_prompt(
         prompt = "This is your Genetic simulation hyperparameter...",
+        experiment_name = experiment_name,
         weight1 = weight1,
         weight2 = weight2,
         mutationRate = mutation_rate,
         numIndividual = population_size,
         parent_size = int(population_size*elitism),
-        numGeneration = amount_optimisation_steps,        
+        numGeneration = amount_optimisation_steps,  
+        strategy = strategy,      
+        num_hops = num_hops,
     )
     print(decorated_prompt)
 
@@ -107,26 +87,52 @@ def main_process(
         measurement_error[i]
     ] for i in range(ga.population_size)]
 
-    for step in tqdm(range(amount_optimisation_steps), desc='Optimizing... '):
+    # Number of generation
+    for step in tqdm(range(amount_optimisation_steps), desc='Optimizing step... '):
         
         fidelity_array = []
         cost_array = []
         index = 0
-        for loss_parameter in tqdm(optimize_data, desc="Simulating... "):
+
+        # Number of individual in population
+        for loss_parameter in optimize_data:
             
-            assert len(loss_parameter) == 4
+            assert len(loss_parameter) == 4        
             
             # In this part, loss must be [0, 1] value
             loss = loss_parameter[0]
             memory_time = loss_parameter[1]
             gate_error = loss_parameter[2]
-            measurement_error = loss_parameter[3]            
-            depo_prob = 0.03            
+            measurement_error = loss_parameter[3]
+            depo_prob = 0.03                                    
 
             # Transform parameter
             Tloss, Tmemory_time, Tgate_error, Tmeasurement_error = parameterTransform(
                 loss, memory_time, gate_error, measurement_error
             )            
+
+            num_nodes = num_hops + 1
+    
+            node_info = {f'Node {i}': {'coordinate': (int(i*100), 0, 0)} for i in range(num_nodes)}
+            edge_info = {
+                (f'Node {i}', f'Node {i+1}'): {
+                'connection-type': 'Space',
+                'depolarlizing error': [1 - depo_prob, depo_prob/3, depo_prob/3, depo_prob/3],
+                'loss': Tloss,
+                'light speed': 300000,
+                'Pulse rate': 0.0001,
+                f'Node {i}':{
+                    'gate error': Tgate_error,
+                    'measurement error': Tmeasurement_error,
+                    'memory function': Tmemory_time
+                },
+                f'Node {i+1}':{
+                    'gate error': Tgate_error,
+                    'measurement error': Tmeasurement_error,
+                    'memory function': Tmemory_time
+                },
+                }
+            for i in range(num_hops)}
 
             exps = Xperiment(
                 timelines_path = f'../network/{excel_file}',
@@ -135,11 +141,13 @@ def main_process(
                 gate_error = Tgate_error,
                 measurement_error = Tmeasurement_error,
                 memory_time = Tmemory_time,
-                strategies_list=['0G']
+                strategies_list=[strategy]
             )
 
             result = exps.execute()
-            fidelity = result['0G']['fidelity']                     
+
+            # This is fidelity of one individual            
+            fidelity = result[strategy]['fidelity']                     
 
             # Check parameter carefully in every loop
             cost = singleObject_cost(
@@ -151,14 +159,34 @@ def main_process(
                 simFidelity=fidelity
             )            
 
-            # Fidelity array will correct all fidelity in one Generation
+            # Fidelity array will collect all fidelity in one Generation
             fidelity_array.append(fidelity)
             cost_array.append(cost)
             index += 1
             
         assert len(fidelity_array) == len(optimize_data) == len(cost_array) == ga.population_size
 
-        # experiment_result['Fidelity_history'].append(fidelity_array)
+        max_fidelity_generation = np.max(fidelity_array)
+        mean_fidelity_generation = np.mean(fidelity_array)
+        min_fidelity_generation = np.min(fidelity_array)
+        max_cost_generation = np.max(cost_array)
+        mean_cost_generation = np.mean(cost_array)        
+        min_cost_generation = np.min(cost_array)
+
+        index_max_fidelity = np.argmax(fidelity_array)
+        best_parameter_generation = optimize_data[index_max_fidelity]
+
+        experiment_result.experiment_config['Parameter_history']['loss'].append(best_parameter_generation[0])
+        experiment_result.experiment_config['Parameter_history']['memory_time'].append(best_parameter_generation[1])
+        experiment_result.experiment_config['Parameter_history']['gate_error'].append(best_parameter_generation[2])
+        experiment_result.experiment_config['Parameter_history']['measurement_error'].append(best_parameter_generation[3])
+
+        experiment_result.experiment_config['fidelity_history']['max'].append(max_fidelity_generation)
+        experiment_result.experiment_config['fidelity_history']['mean'].append(mean_fidelity_generation)
+        experiment_result.experiment_config['fidelity_history']['min'].append(min_fidelity_generation)
+        experiment_result.experiment_config['cost_history']['max'].append(max_cost_generation)
+        experiment_result.experiment_config['cost_history']['mean'].append(mean_cost_generation)
+        experiment_result.experiment_config['cost_history']['min'].append(min_cost_generation)        
 
         # Genetic Algorithm Part        
 
@@ -180,17 +208,15 @@ def main_process(
 
     # Add ga object and Save result
     experiment_result.add_ga_object(ga)
-
-    path = f'results/{experiment_name}'
-    if not os.path.exists('results'):
-        os.mkdir('results')
+    
+    path = f'../results/{experiment_name}'
     experiment_result.save(file_path=path, folder_name=experiment_name)
 
 if __name__ == '__main__':
 
-    input_config = input("Enter config file name : ")
+    # input_config = input("Enter config file name : ")
 
-    config_filename = input_config
+    config_filename = "config.json"
     config = read_config(config_filename)
 
     experiment_name = config["experiment_name"]
@@ -208,6 +234,24 @@ if __name__ == '__main__':
     objective_fidelity = config["objective_fidelity"]
     num_hops = config["num_hops"]
     excel_file = config["excel_file"]
+    strategy = config["strategy"]
+
+    # print("Experiment name : ", experiment_name)
+    # print("Elitism : ", elitism)
+    # print("Population size : ", population_size)
+    # print("Mutation rate : ", mutation_rate)
+    # print("Mutation sigma : ", mutation_sigma)
+    # print("Mutation decay : ", mutation_decay)
+    # print("Mutation limit : ", mutation_limit)
+    # print("Amount optimisation steps : ", amount_optimisation_steps)
+    # print("DNA bounds : ", dna_bounds)
+    # print("DNA start position : ", dna_start_position)
+    # print("Weight 1 : ", weight1)
+    # print("Weight 2 : ", weight2)
+    # print("Objective fidelity : ", objective_fidelity)
+    # print("Number of hops : ", num_hops)
+    # print("Excel file : ", excel_file)
+    # print("Strategy : ", strategy)
 
     main_process(
         experiment_name,
@@ -224,5 +268,6 @@ if __name__ == '__main__':
         weight2,
         objective_fidelity,
         num_hops,
-        excel_file
+        excel_file,
+        strategy
     )

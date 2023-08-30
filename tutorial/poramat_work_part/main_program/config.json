@@ -1,15 +1,18 @@
 {
-  "experiment_name": "my_experiment",
+  "experiment_name": "for_test_plot_function",
   "elitism": 0.2,
-  "population_size": 10,
+  "population_size": 3,
   "mutation_rate": 0.8,
   "mutation_sigma": 0.3,
   "mutation_decay": 0.999,
   "mutation_limit": 0.01,
-  "amount_optimisation_steps": 400,
+  "amount_optimisation_steps": 20,
   "dna_bounds": [0, 1],
   "dna_start_position": [0, 0, 0, 0],
-  "weight1": 0.1,
-  "weight2": 0.9,
-  "objective_fidelity": 0.7
+  "weight1": 0.5,
+  "weight2": 0.5,
+  "objective_fidelity": 0.7,
+  "num_hops": 4,
+  "excel_file": "exper_id6_selectedStats_4hops.xlsx",
+  "strategy": "0G"
 }
