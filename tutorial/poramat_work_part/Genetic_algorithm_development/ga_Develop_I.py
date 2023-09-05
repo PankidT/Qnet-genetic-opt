@@ -5,9 +5,7 @@ import sys
 import datetime
 import seaborn as sns
 import pandas as pd
-
-sys.path.insert(0, '/Users/poramat/Documents/qwanta/tutorial/poramat_work_part')
-from all_function import *
+from Genetic_algorithm_development.all_function import *
 
 class GA_Develop_I():
 
@@ -187,11 +185,11 @@ class ExperimentResult():
     def add_parameter(self, parameter_name, value):
         self.experiment_config[parameter_name] = value
 
-    def save(self, file_path, folder_name):
+    def save(self, file_path, file_name):
 
-        folder_name = f'results_{folder_name}'        
+        file_name = f'results_{file_name}'        
 
-        with open(file_path, 'wb') as f:
+        with open(file_path + "/" + file_name, 'wb') as f:
             pickle.dump(self, f)    
 
     def plot(self):

@@ -1,0 +1,18 @@
+{
+  "experiment_name": "test_config_4",
+  "elitism": 0.2,
+  "population_size": 3,
+  "mutation_rate": 0.8,
+  "mutation_sigma": 0.3,
+  "mutation_decay": 0.999,
+  "mutation_limit": 0.01,
+  "amount_optimization_steps": 4,
+  "dna_bounds": [0, 1],
+  "dna_start_position": [0, 0, 0, 0],
+  "weight1": 0.5,
+  "weight2": 0.5,
+  "objective_fidelity": 0.7,
+  "num_hops": 2,
+  "excel_file": "exper_id3_selectedStats_2hops.xlsx",
+  "strategy": "0G"
+}

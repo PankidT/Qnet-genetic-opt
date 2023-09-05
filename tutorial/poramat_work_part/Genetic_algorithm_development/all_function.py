@@ -2,11 +2,8 @@ import numpy as np
 import random
 import datetime
 import json
-import os
 import pickle
-import sys
-sys.path.insert(0, '/Users/poramat/Documents/qwanta/tutorial/poramat_work_part/Genetic_algorithm_development')
-from ga_Develop_I import *
+from Genetic_algorithm_development.ga_Develop_I import *
 
 def multinomial_argmax(probabilities):
     # normalize probabilities to sum to 1

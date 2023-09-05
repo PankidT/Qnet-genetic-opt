@@ -1,17 +1,12 @@
-import sys
-sys.path.insert(0, '/Users/poramat/Documents/qwanta/tutorial/poramat_work_part/Genetic_algorithm_development')
-sys.path.insert(1, '/Users/poramat/Documents/qwanta/tutorial/poramat_work_part')
-sys.path.insert(2, '/Users/poramat/Documents/qwanta')
-sys.path.insert(3, '/Users/poramat/Documents/qwanta/tutorial/network')
-from ga_Develop_I import *
-from all_function import *
+from Genetic_algorithm_development.ga_Develop_I import *
+from Genetic_algorithm_development.all_function import *
 from qwanta import Xperiment
 from tqdm import tqdm
 import os
 import multiprocessing
 
 def main_process(
-    experiment_name='Experiment_1',
+    experiment_name,
     elitism = 0.2,
     population_size = 500,
     mutation_rate = 0.8,
@@ -211,8 +206,8 @@ def main_process(
     # Add ga object and Save result
     experiment_result.add_ga_object(ga)
     
-    path = f'../results/{experiment_name}'
-    experiment_result.save(file_path=path, folder_name=experiment_name)
+    path = f'results'
+    experiment_result.save(file_path=path, file_name=experiment_name)
 
 def process_config(config_filename):
     config = read_config("configs/" + config_filename)
