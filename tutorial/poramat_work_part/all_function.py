@@ -1,11 +1,12 @@
-import pandas as pd
-import csv
 import numpy as np
-import networkx as nx
-from tqdm import tqdm
 import random
 import datetime
 import json
+import os
+import pickle
+import sys
+sys.path.insert(0, '/Users/poramat/Documents/qwanta/tutorial/poramat_work_part/Genetic_algorithm_development')
+from ga_Develop_I import *
 
 def multinomial_argmax(probabilities):
     # normalize probabilities to sum to 1
@@ -354,3 +355,12 @@ def read_config(filename):
     with open(filename, 'r') as f:
         config = json.load(f)
     return config
+
+def visualize_result(path, plot=True):
+    with open(path, "rb") as f:
+        results = pickle.load(f)
+
+    if plot:
+        results.plot()
+
+    return results

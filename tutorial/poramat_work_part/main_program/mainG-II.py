@@ -8,6 +8,7 @@ from all_function import *
 from qwanta import Xperiment
 from tqdm import tqdm
 import os
+import multiprocessing
 
 def main_process(
     experiment_name='Experiment_1',
@@ -17,7 +18,7 @@ def main_process(
     mutation_sigma = 0.3,
     mutation_decay = 0.999,
     mutation_limit = 0.01,
-    amount_optimisation_steps = 400,
+    amount_optimization_steps = 400,
     dna_bounds = (0, 1),
     dna_start_position = [0, 0, 0, 0],
     weight1 = 0.5,
@@ -48,7 +49,7 @@ def main_process(
         mutation_rate=mutation_rate,
         population_size=mutation_sigma, 
         elitism=elitism, 
-        amount_optimization_steps=amount_optimisation_steps,                       
+        amount_optimization_steps=amount_optimization_steps,                       
     )
 
     decorated_prompt = decorate_prompt(
@@ -59,7 +60,7 @@ def main_process(
         mutationRate = mutation_rate,
         numIndividual = population_size,
         parent_size = int(population_size*elitism),
-        numGeneration = amount_optimisation_steps,  
+        numGeneration = amount_optimization_steps,  
         strategy = strategy,      
         num_hops = num_hops,
     )
@@ -89,7 +90,7 @@ def main_process(
     ] for i in range(ga.population_size)]
 
     # Number of generation
-    for step in tqdm(range(amount_optimisation_steps), desc='Optimizing step... '):
+    for step in tqdm(range(amount_optimization_steps), desc='Optimizing step... '):
         
         fidelity_array = []
         cost_array = []
@@ -213,12 +214,8 @@ def main_process(
     path = f'../results/{experiment_name}'
     experiment_result.save(file_path=path, folder_name=experiment_name)
 
-if __name__ == '__main__':
-
-    # config_filename = input("Enter config file name : ")
-
-    config_filename = "config.json"
-    config = read_config(config_filename)
+def process_config(config_filename):
+    config = read_config("configs/" + config_filename)
 
     experiment_name = config["experiment_name"]
     elitism = config["elitism"]
@@ -227,7 +224,7 @@ if __name__ == '__main__':
     mutation_sigma = config["mutation_sigma"]
     mutation_decay = config["mutation_decay"]
     mutation_limit = config["mutation_limit"]
-    amount_optimisation_steps = config["amount_optimisation_steps"]
+    amount_optimization_steps = config["amount_optimization_steps"]
     dna_bounds = config["dna_bounds"]
     dna_start_position = config["dna_start_position"]
     weight1 = config["weight1"]
@@ -245,7 +242,7 @@ if __name__ == '__main__':
         mutation_sigma,
         mutation_decay,
         mutation_limit,
-        amount_optimisation_steps,
+        amount_optimization_steps,
         dna_bounds,
         dna_start_position,
         weight1,
@@ -255,3 +252,78 @@ if __name__ == '__main__':
         excel_file,
         strategy
     )
+
+if __name__ == '__main__':
+    config_directory = "configs/"  # Update this to the directory where your config files are located
+    
+    # List all the files in the config directory
+    config_files = os.listdir(config_directory)
+    
+    # Ask the user for their choice
+    user_choice = input("Run all config file? (Y/n)").strip().lower()
+    
+    if user_choice == 'y':
+        # Create a multiprocessing pool with the number of desired parallel processes
+        num_processes = multiprocessing.cpu_count()  # Use all available CPU cores
+        pool = multiprocessing.Pool(processes=num_processes)
+        
+        # Use pool.map to execute process_config in parallel for each config file
+        pool.map(process_config, [filename for filename in config_files if filename.endswith(".json")])
+        
+        # Close the pool and wait for all processes to finish
+        pool.close()
+        pool.join()
+    elif user_choice == 'n':
+        # Ask the user for the specific config file name to run
+        config_filename = input("Enter the config file name to run: ").strip()
+        
+        # Check if the specified config file exists
+        if config_filename in config_files:
+            process_config(config_filename)
+        else:
+            print(f"The config file '{config_filename}' does not exist in the 'configs' directory.")
+    else:
+        print("Invalid choice. Please enter 'all' or 'one'.")
+
+# if __name__ == '__main__':
+
+#     # config_filename = input("Enter config file name : ")
+
+#     config_filename = "configs/config.json"
+#     config = read_config(config_filename)
+
+#     experiment_name = config["experiment_name"]
+#     elitism = config["elitism"]
+#     population_size = config["population_size"]
+#     mutation_rate = config["mutation_rate"]
+#     mutation_sigma = config["mutation_sigma"]
+#     mutation_decay = config["mutation_decay"]
+#     mutation_limit = config["mutation_limit"]
+#     amount_optimization_steps = config["amount_optimization_steps"]
+#     dna_bounds = config["dna_bounds"]
+#     dna_start_position = config["dna_start_position"]
+#     weight1 = config["weight1"]
+#     weight2 = config["weight2"]
+#     objective_fidelity = config["objective_fidelity"]
+#     num_hops = config["num_hops"]
+#     excel_file = config["excel_file"]
+#     strategy = config["strategy"]
+
+#     main_process(
+#         experiment_name,
+#         elitism,
+#         population_size,
+#         mutation_rate,
+#         mutation_sigma,
+#         mutation_decay,
+#         mutation_limit,
+#         amount_optimization_steps,
+#         dna_bounds,
+#         dna_start_position,
+#         weight1,
+#         weight2,
+#         objective_fidelity,
+#         num_hops,
+#         excel_file,
+#         strategy
+#     )

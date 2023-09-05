@@ -7,7 +7,7 @@ import seaborn as sns
 import pandas as pd
 
 sys.path.insert(0, '/Users/poramat/Documents/qwanta/tutorial/poramat_work_part')
-from all_function import parameterTransform
+from all_function import *
 
 class GA_Develop_I():
 
