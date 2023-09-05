@@ -73,12 +73,13 @@ def main_process(
 
     # photon loss (db/km): 
     photon_loss = [ga.population[i][0] for i in range(ga.population_size)]
-    # gate error: (%)
-    gate_error = [ga.population[i][1] for i in range(ga.population_size)]
-    # measurement error: (%)
-    measurement_error = [ga.population[i][2] for i in range(ga.population_size)]
     # coherence time (seconds):
-    coherence = [ga.population[i][3] for i in range(ga.population_size)]
+    coherence = [ga.population[i][1] for i in range(ga.population_size)]
+    # gate error: (%)
+    gate_error = [ga.population[i][2] for i in range(ga.population_size)]
+    # measurement error: (%)
+    measurement_error = [ga.population[i][3] for i in range(ga.population_size)]
+    
         
     optimize_data = [[
         photon_loss[i], 
@@ -214,7 +215,7 @@ def main_process(
 
 if __name__ == '__main__':
 
-    # input_config = input("Enter config file name : ")
+    # config_filename = input("Enter config file name : ")
 
     config_filename = "config.json"
     config = read_config(config_filename)
@@ -235,23 +236,6 @@ if __name__ == '__main__':
     num_hops = config["num_hops"]
     excel_file = config["excel_file"]
     strategy = config["strategy"]
-
-    # print("Experiment name : ", experiment_name)
-    # print("Elitism : ", elitism)
-    # print("Population size : ", population_size)
-    # print("Mutation rate : ", mutation_rate)
-    # print("Mutation sigma : ", mutation_sigma)
-    # print("Mutation decay : ", mutation_decay)
-    # print("Mutation limit : ", mutation_limit)
-    # print("Amount optimisation steps : ", amount_optimisation_steps)
-    # print("DNA bounds : ", dna_bounds)
-    # print("DNA start position : ", dna_start_position)
-    # print("Weight 1 : ", weight1)
-    # print("Weight 2 : ", weight2)
-    # print("Objective fidelity : ", objective_fidelity)
-    # print("Number of hops : ", num_hops)
-    # print("Excel file : ", excel_file)
-    # print("Strategy : ", strategy)
 
     main_process(
         experiment_name,

@@ -50,19 +50,6 @@ class GA_Develop_I():
         # Initialize a list to store the cost values at each generation
         self.lowest_cost_history = []
         self.average_cost_history = []
-
-    # def __create_random_population(
-    #     self,
-    #     dna_size, 
-    #     dna_sigma, 
-    #     dna_start_position,
-    #     population_size):
-    #     # Create a random population of individuals
-        
-    #     # (dimentsion of array)
-    #     population = np.random.standard_normal((population_size, dna_size)) * dna_sigma
-        
-    #     return population + dna_start_position
     
     def __create_random_population(
         self,
@@ -142,6 +129,15 @@ class GA_Develop_I():
         self.average_cost_history.append(average_cost)
 
         return self.best_dna, self.lowest_cost
+    
+    def plot(self):
+        plt.plot(self.lowest_cost_history, label="Lowest Cost")
+        plt.plot(self.average_cost_history, label="Average Cost")
+        plt.xlabel("Generation")
+        plt.ylabel("Cost")
+        plt.title("Cost over Generations")
+        plt.legend()
+        plt.show()
 
 class ExperimentResult():
     def __init__(self, 
